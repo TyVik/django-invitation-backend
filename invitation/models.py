@@ -11,8 +11,8 @@ from django.template.loader import render_to_string
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-import app_settings
-import signals
+from .app_settings import EXPIRE_DAYS
+from .signals import invitation_sent, invitation_accepted
 
 
 class InvitationError(Exception):
@@ -62,12 +62,12 @@ class InvitationManager(models.Manager):
 
     def valid(self):
         """Filter valid invitations."""
-        expiration = now() - datetime.timedelta(app_settings.EXPIRE_DAYS)
+        expiration = now() - datetime.timedelta(EXPIRE_DAYS)
         return self.get_query_set().filter(date_invited__gte=expiration)
 
     def invalid(self):
         """Filter invalid invitation."""
-        expiration = now() - datetime.timedelta(app_settings.EXPIRE_DAYS)
+        expiration = now() - datetime.timedelta(EXPIRE_DAYS)
         return self.get_query_set().filter(date_invited__le=expiration)
 
     def delete_expired_keys(self):
@@ -111,7 +111,7 @@ class Invitation(models.Model):
 
     @property
     def _expires_at(self):
-        return self.date_invited + datetime.timedelta(app_settings.EXPIRE_DAYS)
+        return self.date_invited + datetime.timedelta(EXPIRE_DAYS)
 
     def is_valid(self):
         """Return ``True`` if the invitation is still valid, ``False``
@@ -167,11 +167,11 @@ class Invitation(models.Model):
         subject = ''.join(subject.splitlines())
         message = render_to_string('invitation/invitation_email.txt', {
             'invitation': self,
-            'expiration_days': app_settings.EXPIRE_DAYS,
+            'expiration_days': EXPIRE_DAYS,
             'site': site
         })
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
-        signals.invitation_sent.send(sender=self)
+        invitation_sent.send(sender=self)
 
     def mark_accepted(self, new_user):
         """Update sender's invitation statistics and delete self.
@@ -179,7 +179,7 @@ class Invitation(models.Model):
         ``invitation.signals.invitation_accepted`` is sent just before the
         instance is deleted.
         """
-        signals.invitation_accepted.send(sender=self,
+        invitation_accepted.send(sender=self,
                                          inviting_user=self.user,
                                          new_user=new_user)
         self.delete()
