@@ -39,6 +39,7 @@ class InvitationManager(models.Manager):
         if invitation is None:
             key = '%s%0.16f%s%s' % (settings.SECRET_KEY, random.random(),
                                     user.email, email)
+            key = key.encode('utf-8')
             key = hashlib.sha1(key).hexdigest()
             invitation = self.create(user=user, email=email, key=key)
         return invitation
