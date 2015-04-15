@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
@@ -30,7 +31,7 @@ class RegistrationView(BaseRegistrationView):
         return {'email': self.invitation.email}
 
     def get_success_url(self, request, user):
-        return (user.get_absolute_url(), (), {})
+        return (reverse('invitation_registered'), (), {})
 
     def registration_allowed(self, request):
         """Search for a valid invitation key."""
