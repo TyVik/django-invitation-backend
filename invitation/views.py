@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.db.models.loading import get_model
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
@@ -15,6 +16,7 @@ from registration.views import RegistrationView as BaseRegistrationView
 
 from .models import InvitationError, Invitation
 from .forms import InvitationForm
+from .app_settings import INVITATION_MODEL
 
 
 class RegistrationView(BaseRegistrationView):
@@ -37,7 +39,8 @@ class RegistrationView(BaseRegistrationView):
         """Search for a valid invitation key."""
         invitation_key = self.kwargs.get('invitation_key')
         try:
-            self.invitation = Invitation.objects.find(invitation_key)
+            cls = get_model(*INVITATION_MODEL.split('.', 1))
+            self.invitation = cls.objects.find(invitation_key)
         except Invitation.DoesNotExist:
             return False
         return True
@@ -70,7 +73,8 @@ class InvitationView(FormView):
 
     def form_valid(self, form):
         try:
-            self.invitation = Invitation.objects.invite(
+            cls = get_model(*INVITATION_MODEL.split('.', 1))
+            self.invitation = cls.objects.invite(
                 self.request.user, form.cleaned_data['email']
             )
         except InvitationError:
