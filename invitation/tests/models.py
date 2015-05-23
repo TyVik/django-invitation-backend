@@ -1,11 +1,11 @@
 import datetime
 from django.core import mail
-from django.contrib.auth.models import User
 from django.utils.timezone import now
 
 from utils import BaseTestCase
 from invitation import app_settings
 from invitation.models import Invitation
+from invitation.users import UserModel
 
 
 EXPIRE_DAYS = app_settings.EXPIRE_DAYS
@@ -34,7 +34,7 @@ class InvitationTestCase(BaseTestCase):
         self.assertEqual(mail.outbox[1].recipients()[0], u'other@email.org')
 
     def test_mark_accepted(self):
-        new_user = User.objects.create_user('test', 'test@example.com', 'test')
+        new_user = UserModel().objects.create_user('test', 'test@example.com', 'test')
         pk = self.invitation.pk
         self.invitation.mark_accepted(new_user)
         self.assertRaises(Invitation.DoesNotExist,

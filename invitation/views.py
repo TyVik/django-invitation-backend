@@ -17,6 +17,7 @@ from registration.views import RegistrationView as BaseRegistrationView
 from .models import InvitationError, Invitation
 from .forms import InvitationForm
 from .app_settings import INVITATION_MODEL
+from .users import UserModel
 
 
 class RegistrationView(BaseRegistrationView):
@@ -50,7 +51,7 @@ class RegistrationView(BaseRegistrationView):
         username, email, password = cleaned_data['username'], \
                                     cleaned_data['email'], \
                                     cleaned_data['password1']
-        User.objects.create_user(username, email, password)
+        UserModel().objects.create_user(username, email, password)
         self.user = authenticate(username=username, password=password)
         login(request, self.user)
         user_registered.send(sender=self.__class__, user=self.user,

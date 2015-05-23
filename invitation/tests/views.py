@@ -1,8 +1,8 @@
 from django.core.urlresolvers import reverse
 from django.core import mail
-from django.contrib.auth.models import User
 from utils import BaseTestCase
 from invitation.models import Invitation
+from invitation.users import UserModel
 
 
 class InviteOnlyModeTestCase(BaseTestCase):
@@ -48,7 +48,7 @@ class InviteOnlyModeTestCase(BaseTestCase):
                                      'password2': u'friend'})
         self.assertRedirects(response, '/users/friend/')
         self.assertEqual(len(mail.outbox), 0)       # No confirmation email
-        new_user = User.objects.get(username='friend')
+        new_user = UserModel().objects.get(username='friend')
         self.assertEqual(new_user.email, 'other@example.com')
         self.assertEqual(new_user.is_active, True)
         self.assertRaises(Invitation.DoesNotExist,

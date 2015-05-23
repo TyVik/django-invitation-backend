@@ -1,8 +1,8 @@
 import os
 from django.conf import settings
 from django.test import TestCase
-from django.contrib.auth.models import User
 
+from invitation.users import UserModel
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -10,9 +10,9 @@ class BaseTestCase(TestCase):
         settings.TEMPLATE_DIRS = (
             os.path.join(os.path.dirname(__file__), 'templates'),
         )
-        User.objects.create_user('testuser',
+        UserModel().objects.create_user('testuser',
                                  'testuser@example.com',
                                  'testuser')
 
     def user(self):
-        return User.objects.get(username='testuser')
+        return UserModel().objects.get(username='testuser')

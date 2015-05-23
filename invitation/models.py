@@ -4,7 +4,6 @@ import random
 
 from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.sites.models import Site, RequestSite
 from django.db import models
 from django.template.loader import render_to_string
@@ -13,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .app_settings import EXPIRE_DAYS
 from .signals import invitation_sent, invitation_accepted
+from .users import UserModelString
 
 
 class InvitationError(Exception):
@@ -87,7 +87,7 @@ class InvitationManager(models.Manager):
 
 
 class Invitation(models.Model):
-    user = models.ForeignKey(User, related_name='invitations')
+    user = models.ForeignKey(UserModelString(), related_name='invitations')
     email = models.EmailField(_(u'e-mail'))
     key = models.CharField(_(u'invitation key'), max_length=40, unique=True)
     date_invited = models.DateTimeField(_(u'date invited'), default=now())
